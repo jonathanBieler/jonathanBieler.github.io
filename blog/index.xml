@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blogs on jonathanBieler.github.io</title>
+    <link>https://jonathanBieler.github.io/blog/</link>
+    <description>Recent content in Blogs on jonathanBieler.github.io</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 08 Apr 2024 15:14:00 +0200</lastBuildDate>
+    <atom:link href="https://jonathanBieler.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Testing this</title>
+      <link>https://jonathanBieler.github.io/blog/my-new-post/</link>
+      <pubDate>Mon, 08 Apr 2024 15:14:00 +0200</pubDate>
+      <guid>https://jonathanBieler.github.io/blog/my-new-post/</guid>
+      <description>This is a page about »My New Post«.&#xA;function get_refname(record::SAM.Record) !SAM.hasrefname(record) &amp;amp;&amp;amp; return &amp;#34;*&amp;#34; SAM.refname(record) end </description>
+    </item>
+  </channel>
+</rss>
