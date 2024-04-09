@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>jonathanBieler.github.io</title>
-    <link>https://jonathanBieler.github.io/</link>
+    <link>http://localhost:1313/</link>
     <description>Recent content on jonathanBieler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 08 Apr 2024 15:14:00 +0200</lastBuildDate>
-    <atom:link href="https://jonathanBieler.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Testing this</title>
-      <link>https://jonathanBieler.github.io/blog/my-new-post/</link>
+      <title>From FASTQ to CNV calls in Julia</title>
+      <link>http://localhost:1313/blog/fastq2cnv/</link>
       <pubDate>Mon, 08 Apr 2024 15:14:00 +0200</pubDate>
-      <guid>https://jonathanBieler.github.io/blog/my-new-post/</guid>
-      <description>This is a page about »My New Post«.&#xA;function get_refname(record::SAM.Record) !SAM.hasrefname(record) &amp;amp;&amp;amp; return &amp;#34;*&amp;#34; SAM.refname(record) end </description>
+      <guid>http://localhost:1313/blog/fastq2cnv/</guid>
+      <description>I&amp;rsquo;ve recently worked on Julia bindings for BWA, allowing to align sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates to XAM.jl and BioRecordsProcessing.jl will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.&#xA;To illustrate this I will showcase online whole-genome sequencing (WGS) copy number variation (CNV) calling on a mouse kidney tumor sample.&#xA;Briefly, we need to do the following :</description>
     </item>
   </channel>
 </rss>

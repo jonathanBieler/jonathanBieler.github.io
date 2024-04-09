@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>From FASTQ to CNV calls in Julia | jonathanBieler.github.io</title>
+<meta name="title" content="From FASTQ to CNV calls in Julia" />
+<meta name="description" content="I&rsquo;ve recently worked on Julia bindings for BWA, allowing to align sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates to XAM.jl and BioRecordsProcessing.jl will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.
+To illustrate this I will showcase online whole-genome sequencing (WGS) copy number variation (CNV) calling on a mouse kidney tumor sample.
+Briefly, we need to do the following :" />
+<meta name="keywords" content="julialang,bioinformatics," />
+
+
+<meta property="og:title" content="From FASTQ to CNV calls in Julia" />
+<meta property="og:description" content="I&rsquo;ve recently worked on Julia bindings for BWA, allowing to align sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates to XAM.jl and BioRecordsProcessing.jl will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.
+To illustrate this I will showcase online whole-genome sequencing (WGS) copy number variation (CNV) calling on a mouse kidney tumor sample.
+Briefly, we need to do the following :" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://jonathanBieler.github.io/blog/fastq2cnv/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2024-04-08T15:14:00+02:00" />
+<meta property="article:modified_time" content="2024-04-08T15:14:00+02:00" />
+
+
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="From FASTQ to CNV calls in Julia"/>
+<meta name="twitter:description" content="I&rsquo;ve recently worked on Julia bindings for BWA, allowing to align sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates to XAM.jl and BioRecordsProcessing.jl will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.
+To illustrate this I will showcase online whole-genome sequencing (WGS) copy number variation (CNV) calling on a mouse kidney tumor sample.
+Briefly, we need to do the following :"/>
+
+
+
+<meta itemprop="name" content="From FASTQ to CNV calls in Julia">
+<meta itemprop="description" content="I&rsquo;ve recently worked on Julia bindings for BWA, allowing to align sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates to XAM.jl and BioRecordsProcessing.jl will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.
+To illustrate this I will showcase online whole-genome sequencing (WGS) copy number variation (CNV) calling on a mouse kidney tumor sample.
+Briefly, we need to do the following :"><meta itemprop="datePublished" content="2024-04-08T15:14:00+02:00" />
+<meta itemprop="dateModified" content="2024-04-08T15:14:00+02:00" />
+<meta itemprop="wordCount" content="1400">
+<meta itemprop="keywords" content="julialang,bioinformatics," />
+<meta name="referrer" content="no-referrer-when-downgrade" />
+
+  <style>
+  body {
+    font-family: Verdana, sans-serif;
+    margin: auto;
+    padding: 20px;
+    max-width: 720px;
+    text-align: left;
+    background-color: #fff;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
+    color: #444;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  strong,
+  b {
+    color: #222;
+  }
+
+  a {
+    color: #3273dc;
+     
+  }
+
+  .title {
+    text-decoration: none;
+    border: 0;
+  }
+
+  .title span {
+    font-weight: 400;
+  }
+
+  nav a {
+    margin-right: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  input {
+    font-size: 16px;
+  }
+
+  content {
+    line-height: 1.6;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  code {
+    padding: 2px 5px;
+    background-color: #f2f2f2;
+  }
+
+  pre code {
+    color: #222;
+    display: block;
+    padding: 20px;
+    white-space: pre-wrap;
+    font-size: 14px;
+    overflow-x: auto;
+  }
+
+  div.highlight pre {
+    background-color: initial;
+    color: initial;
+  }
+
+  div.highlight code {
+    background-color: unset;
+    color: unset;
+  }
+
+  blockquote {
+    border-left: 1px solid #999;
+    color: #222;
+    padding-left: 20px;
+    font-style: italic;
+  }
+
+  footer {
+    padding: 25px;
+    text-align: center;
+  }
+
+  .helptext {
+    color: #777;
+    font-size: small;
+  }
+
+  .errorlist {
+    color: #eba613;
+    font-size: small;
+  }
+
+   
+  ul.blog-posts {
+    list-style-type: none;
+    padding: unset;
+  }
+
+  ul.blog-posts li {
+    display: flex;
+  }
+
+  ul.blog-posts li span {
+    flex: 0 0 130px;
+  }
+
+  ul.blog-posts li a:visited {
+    color: #8b6fcb;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #333;
+      color: #ddd;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    strong,
+    b {
+      color: #eee;
+    }
+
+    a {
+      color: #8cc2dd;
+    }
+
+    code {
+      background-color: #777;
+    }
+
+    pre code {
+      color: #ddd;
+    }
+
+    blockquote {
+      color: #ccc;
+    }
+
+    textarea,
+    input {
+      background-color: #252525;
+      color: #ddd;
+    }
+
+    .helptext {
+      color: #aaa;
+    }
+  }
+
+</style>
+
+</head>
+
+<body>
+  <header><a href="/" class="title">
+  <h2>jonathanBieler.github.io</h2>
+</a>
+<nav><a href="/">Home</a>
+
+
+<a href="/blog">Blog</a>
+
+</nav>
+</header>
+  <main>
+
+<h1>From FASTQ to CNV calls in Julia</h1>
+<p>
+  <i>
+    <time datetime='2024-04-08' pubdate>
+      08 Apr, 2024
+    </time>
+  </i>
+</p>
+
+<content>
+  <p>I&rsquo;ve recently worked on <a href="https://github.com/jonathanBieler/BurrowsWheelerAligner.jl">Julia bindings</a> for BWA, allowing to align
+sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates
+to <a href="https://github.com/BioJulia/XAM.jl.git">XAM.jl</a> and <a href="https://github.com/jonathanBieler/BioRecordsProcessing.jl">BioRecordsProcessing.jl</a>
+will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.</p>
+<p>To illustrate this I will showcase online whole-genome sequencing (WGS) copy number variation (CNV) calling on a mouse kidney tumor sample.</p>
+<p>Briefly, we need to do the following :</p>
+<ol>
+<li>Read a pair of FASTQ files</li>
+<li>Align each pair of reads to the reference genome</li>
+<li>Count the number of read pairs aligning to a given window in the reference genome</li>
+<li>Normalize the counts to produce a normalized (log2) coverage profile</li>
+<li>Use an HMM to segment the profile</li>
+<li>Visualize the results</li>
+</ol>
+<p>This will result in the following animation, showing how the coverage profile and segmentation evolves
+as more reads get processed :</p>
+<p><img src="/fastq2CNV/SRR23498664_1.fastq_segmentation.gif" alt="targets"></p>
+<p><strong>Disclaimer :</strong> This is not intended to be used as a serious CNV calling pipeline. I&rsquo;m also using the development versions
+of the libraries listed above.</p>
+<h3 id="aligning-reads-to-the-reference-genome">Aligning reads to the reference genome</h3>
+<p>First we need to get some data, finding publicly available WGS data from tumor is difficult,
+but after browsing I found this <a href="https://www.ncbi.nlm.nih.gov/biosample/SAMN33326248">Mus musculus kidney tumor sample</a> that
+has WGS data that can be downloaded from <a href="https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&amp;acc=SRR23498664&amp;display=metadata">NCBI</a>.</p>
+<p>Next we&rsquo;ll setup an aligner from <code>BurrowsWheelerAligner.jl</code>, loading the reference genome (which was already indexed with <code>bwa index</code>) :</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span><span style="color:#66d9ef">using</span> BurrowsWheelerAligner
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> BWA <span style="color:#f92672">=</span> BurrowsWheelerAligner
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>aligner <span style="color:#f92672">=</span> BWA<span style="color:#f92672">.</span>Aligner(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;/tmp/mouse_genome/Mus_musculus.GRCm39.dna.primary_assembly.fa.gz&#34;</span>;
+</span></span><span style="display:flex;"><span>    paired <span style="color:#f92672">=</span> true, nthreads <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>Given a pair of <code>FASTQ</code> reads, to obtain an alignment (as a <code>XAM.SAM.Record</code>) we simply do :</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span>sam_r1, sam_r2 <span style="color:#f92672">=</span> BWA<span style="color:#f92672">.</span>align(aligner, (read1, read2))
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span>julia<span style="color:#f92672">&gt;</span>sam_r1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>XAM<span style="color:#f92672">.</span>SAM<span style="color:#f92672">.</span>Record<span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    template name<span style="color:#f92672">:</span> SRR24288063<span style="color:#ae81ff">.1</span>
+</span></span><span style="display:flex;"><span>            flags<span style="color:#f92672">:</span> <span style="color:#ae81ff">83</span>
+</span></span><span style="display:flex;"><span>        reference<span style="color:#f92672">:</span> <span style="color:#ae81ff">13</span>
+</span></span><span style="display:flex;"><span>         position<span style="color:#f92672">:</span> <span style="color:#ae81ff">51515489</span>
+</span></span><span style="display:flex;"><span>  mapping quality<span style="color:#f92672">:</span> <span style="color:#ae81ff">60</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">...</span>
+</span></span></code></pre></div><p>Typically we want to save these aligned reads to a BAM file. BWA internal alignment methods returns a C string
+, these are parsed and wrapped in a <code>SAM.Record</code>, which then needs to be encoded
+in the proper binary representation of the BAM format. This can simply done with <code>XAM</code> by passing a <code>SAM.Record</code> to the <code>BAM.Record</code> constructor : <code>XAM.BAM.Record(sam_r1)</code>.</p>
+<h3 id="building-a-pipeline">Building a pipeline</h3>
+<p>In order to read from our pair of FASTQ files and write to a BAM file we will use <code>BioRecordsProcessing.jl</code>,
+which will do the file management for us. In <code>BioRecordsProcessing</code> a pipeline is built by providing a
+source - which will read records and pass them to a user-defined processing function - and a sink that will
+write the records to an output file or collect them in memory. For our case the pipeline will look like :</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span><span style="color:#66d9ef">using</span> BioRecordsProcessing, XAM, FASTX
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>file <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;SRR24288063_1.fastq.gz&#34;</span>
+</span></span><span style="display:flex;"><span>header <span style="color:#f92672">=</span> BWA<span style="color:#f92672">.</span>header(aligner) <span style="color:#75715e"># SAM.Header containing the chromosome names and lengths</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p <span style="color:#f92672">=</span> Pipeline(
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Source</span>
+</span></span><span style="display:flex;"><span>    Reader(FASTQ, File(file; second_in_pair <span style="color:#f92672">=</span> x <span style="color:#f92672">-&gt;</span> replace(x, <span style="color:#e6db74">&#34;_1&#34;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#34;_2&#34;</span>))),
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># User-defined function</span>
+</span></span><span style="display:flex;"><span>    (reads<span style="color:#f92672">...</span>) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">begin</span>
+</span></span><span style="display:flex;"><span>        r1, r2 <span style="color:#f92672">=</span> BWA<span style="color:#f92672">.</span>align(aligner, reads) 
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> BAM<span style="color:#f92672">.</span>Record(r1; header<span style="color:#f92672">=</span>header), BAM<span style="color:#f92672">.</span>Record(r2; header<span style="color:#f92672">=</span>header)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">end</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Sink</span>
+</span></span><span style="display:flex;"><span>    Writer(
+</span></span><span style="display:flex;"><span>        BAM, <span style="color:#e6db74">&#34;.&#34;</span>; 
+</span></span><span style="display:flex;"><span>        extension <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;.bam&#34;</span>, header <span style="color:#f92672">=</span> header, paired <span style="color:#f92672">=</span> false
+</span></span><span style="display:flex;"><span>    ),
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>run(p; max_records <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>) <span style="color:#75715e"># align two fragments</span>
+</span></span></code></pre></div><p>Note we passed the <code>header</code> when converting the records to <code>BAM</code>, this is needed to get the proper chromsome names in the BAM file. We can check that our BAM file is indeed correct :</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span>run(<span style="color:#e6db74">`samtools view SRR24288063_1.fastq.bam`</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># SRR24288063.1   83      13      51515489        60      144M7S  =       51515464        -169    TTCTCTGAGCTTCA...</span>
+</span></span></code></pre></div><h3 id="counting-read-pairs-and-coverage-profile">Counting read-pairs and coverage profile</h3>
+<p>Now that we can align our reads we want to count how many pairs fall in a given genomic interval.
+To do so, we define 500kb bins from chromsome 1 to chromosome Y, with the first bin of chromsome 2 following
+the last of chromosome 1 and so on until the end of Y :</p>
+<pre tabindex="0"><code>Chr1           Chr2
+-------------- -------------- ...
+BIN1 BIN2 BIN3 BIN4 BIN5 BIN6
+</code></pre><p>We define a function <code>to_bin(chr, pos)</code> taking a chromosome and genomic position to quickly
+compute the index of the bin corresponding to the genomic position.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span>chromosomes <span style="color:#f92672">=</span> vcat(string<span style="color:#f92672">.</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">19</span>), <span style="color:#e6db74">&#34;X&#34;</span>, <span style="color:#e6db74">&#34;Y&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># get chromosome length from header</span>
+</span></span><span style="display:flex;"><span>chromosome_lengths <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    first(filter(h <span style="color:#f92672">-&gt;</span> SAM<span style="color:#f92672">.</span>tag(h) <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;SQ&#34;</span> <span style="color:#f92672">&amp;&amp;</span> h[<span style="color:#e6db74">&#34;SN&#34;</span>] <span style="color:#f92672">==</span> chr, header<span style="color:#f92672">.</span>metainfo))[<span style="color:#e6db74">&#34;LN&#34;</span>] <span style="color:#f92672">|&gt;</span> x<span style="color:#f92672">-&gt;</span>parse(<span style="color:#66d9ef">Int</span>,x)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> chr <span style="color:#66d9ef">in</span> chromosomes]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># define bins</span>
+</span></span><span style="display:flex;"><span>binsize <span style="color:#f92672">=</span> <span style="color:#ae81ff">500_000</span>
+</span></span><span style="display:flex;"><span>bins <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>binsize<span style="color:#f92672">:</span>sum(chromosome_lengths)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>offsets <span style="color:#f92672">=</span> <span style="color:#66d9ef">Dict</span>(zip(chromosomes,  vcat(<span style="color:#ae81ff">0</span>, cumsum(chromosome_lengths)[<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#66d9ef">end</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])))
+</span></span><span style="display:flex;"><span>to_bin(chr, pos) <span style="color:#f92672">=</span> ceil(<span style="color:#66d9ef">Int</span>, (pos <span style="color:#f92672">+</span> offsets[chr]) <span style="color:#f92672">/</span> binsize)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># initialize counts to zero</span>
+</span></span><span style="display:flex;"><span>counts <span style="color:#f92672">=</span> zeros(<span style="color:#66d9ef">Int</span>, length(bins))
+</span></span></code></pre></div><p>We can update our processing function with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span>bin_idx <span style="color:#f92672">=</span> to_bin(SAM<span style="color:#f92672">.</span>refname(r1), SAM<span style="color:#f92672">.</span>position(r1))
+</span></span><span style="display:flex;"><span>counts[bin_idx] <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> mod(k, <span style="color:#ae81ff">5_000</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    update_plot(bins, count, offsets, anim; segmentation <span style="color:#f92672">=</span> nothing)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span><span style="display:flex;"><span>k <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><p>Where <code>update_plot</code> is normalizing the counts and plot them using <code>Plots.jl</code>. The chromsomes are shown on the x-axis
+and the y axis is the log2 normalized coverage. In these coordinates -1 and 1 corresponding to copy numbers 1 and 4 for diploid cells
+at high tumor purity.</p>
+<p><img src="/fastq2CNV/SRR23498664_1.fastq_chr22.gif" alt="targets"></p>
+<h3 id="segmentation-using-a-hmm">Segmentation using a HMM</h3>
+<p>Finally we&rsquo;ll use a simple hidden Markov model to segment the counts. I won&rsquo;t go into details
+here, but shortly I&rsquo;m using a fixed discretisation of the normalized coverage (from -5 to 5) for the hidden state,
+and a Normal emission with a standard deviation that decreases with increasing number of reads. There&rsquo;s a small, uniform probability
+of transitioning from a hidden state to any other. Finally I use <code>viterbi</code> to get the most likely sequence of hidden states.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span><span style="color:#66d9ef">using</span> HiddenMarkovModels, LinearAlgebra, Distributions
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> segment_profile(counts)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    bins_cov <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">5</span><span style="color:#f92672">:</span><span style="color:#ae81ff">0.1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>    σ <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">/</span>sqrt(mean(counts))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    N <span style="color:#f92672">=</span> length(bins_cov)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    p_transition <span style="color:#f92672">=</span> <span style="color:#ae81ff">1e-6</span>
+</span></span><span style="display:flex;"><span>    transitions <span style="color:#f92672">=</span> I(N)<span style="color:#f92672">*</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">-</span>p_transition) <span style="color:#f92672">.+</span> p_transition
+</span></span><span style="display:flex;"><span>    transitions <span style="color:#f92672">=</span> transitions <span style="color:#f92672">./</span> sum(transitions, dims<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># mix-in some uniform distributio to help with outliers</span>
+</span></span><span style="display:flex;"><span>    get_emission(μ) <span style="color:#f92672">=</span> MixtureModel(
+</span></span><span style="display:flex;"><span>        vcat(Normal(μ, σ), Uniform(<span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>,<span style="color:#ae81ff">5</span>)), [<span style="color:#ae81ff">0.99</span>, <span style="color:#ae81ff">0.01</span>]
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    emissions <span style="color:#f92672">=</span> [get_emission(mu) <span style="color:#66d9ef">for</span> mu <span style="color:#66d9ef">in</span> bins_cov]
+</span></span><span style="display:flex;"><span>    initial_state <span style="color:#f92672">=</span> ones(N)<span style="color:#f92672">/</span>N
+</span></span><span style="display:flex;"><span>    hmm <span style="color:#f92672">=</span> HMM(initial_state, transitions, emissions)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    obs_seq <span style="color:#f92672">=</span> log2<span style="color:#f92672">.</span>((counts <span style="color:#f92672">.+</span> <span style="color:#ae81ff">0.1</span>) <span style="color:#f92672">./</span> mean(counts))
+</span></span><span style="display:flex;"><span>    obs_seq <span style="color:#f92672">=</span> round<span style="color:#f92672">.</span>(obs_seq, digits <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    obs_seq <span style="color:#f92672">=</span> clamp<span style="color:#f92672">.</span>(obs_seq, extrema(bins_cov)<span style="color:#f92672">...</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    most_likely_state_seq, L <span style="color:#f92672">=</span> viterbi(hmm, obs_seq)
+</span></span><span style="display:flex;"><span>    seg <span style="color:#f92672">=</span> bins_cov[most_likely_state_seq]
+</span></span><span style="display:flex;"><span>    seg
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span></code></pre></div><p>Producing the animation shown above :</p>
+<p><img src="/fastq2CNV/SRR23498664_1.fastq_segmentation.gif" alt="targets"></p>
+<h3 id="performance">Performance</h3>
+<p>Processing 10k read pairs with my pipeline takes about 30s, while simply aligning them with <code>bwa mem</code>
+took about 7 seconds, or a 4x slowdown. Both methods used 2 threads. However, profiling my Julia code indicates
+that most time is spent in BWA&rsquo;s internal <code>mem_process_seqs</code> method. I&rsquo;m calling this method for each read pair, it might
+be better to gather a batch of reads and then pass them to the method.</p>
+<h3 id="final-code">Final code</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span><span style="color:#66d9ef">using</span> BioRecordsProcessing, XAM, FASTX, BurrowsWheelerAligner, Plots, Statistics
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> HiddenMarkovModels, LinearAlgebra, Distributions
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> BWA <span style="color:#f92672">=</span> BurrowsWheelerAligner
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>aligner <span style="color:#f92672">=</span> BWA<span style="color:#f92672">.</span>Aligner(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;/mnt/ssd_disk/mouse_genome/Mus_musculus.GRCm39.dna.primary_assembly.fa.gz&#34;</span>;
+</span></span><span style="display:flex;"><span>    paired <span style="color:#f92672">=</span> true, nthreads <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>header <span style="color:#f92672">=</span> BWA<span style="color:#f92672">.</span>header(aligner)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>chromosomes <span style="color:#f92672">=</span> vcat(string<span style="color:#f92672">.</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">19</span>), <span style="color:#e6db74">&#34;X&#34;</span>, <span style="color:#e6db74">&#34;Y&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># get chromosome length from header</span>
+</span></span><span style="display:flex;"><span>chromosome_lengths <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    first(filter(h <span style="color:#f92672">-&gt;</span> SAM<span style="color:#f92672">.</span>tag(h) <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;SQ&#34;</span> <span style="color:#f92672">&amp;&amp;</span> h[<span style="color:#e6db74">&#34;SN&#34;</span>] <span style="color:#f92672">==</span> chr, header<span style="color:#f92672">.</span>metainfo))[<span style="color:#e6db74">&#34;LN&#34;</span>] <span style="color:#f92672">|&gt;</span> x<span style="color:#f92672">-&gt;</span>parse(<span style="color:#66d9ef">Int</span>,x)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> chr <span style="color:#66d9ef">in</span> chromosomes]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># define bins</span>
+</span></span><span style="display:flex;"><span>binsize <span style="color:#f92672">=</span> <span style="color:#ae81ff">500_000</span>
+</span></span><span style="display:flex;"><span>bins <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>binsize<span style="color:#f92672">:</span>sum(chromosome_lengths)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>offsets <span style="color:#f92672">=</span> <span style="color:#66d9ef">Dict</span>(zip(chromosomes,  vcat(<span style="color:#ae81ff">0</span>, cumsum(chromosome_lengths)[<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#66d9ef">end</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])))
+</span></span><span style="display:flex;"><span>to_bin(chr, pos) <span style="color:#f92672">=</span> ceil(<span style="color:#66d9ef">Int</span>, (pos <span style="color:#f92672">+</span> offsets[chr]) <span style="color:#f92672">/</span> binsize)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># initialize counts to zero</span>
+</span></span><span style="display:flex;"><span>counts <span style="color:#f92672">=</span> zeros(<span style="color:#66d9ef">Int</span>, length(bins))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> segment_profile(counts)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    bins_cov <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">5</span><span style="color:#f92672">:</span><span style="color:#ae81ff">0.1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>    σ <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">/</span>sqrt(mean(counts))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    N <span style="color:#f92672">=</span> length(bins_cov)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    p_transition <span style="color:#f92672">=</span> <span style="color:#ae81ff">1e-6</span>
+</span></span><span style="display:flex;"><span>    transitions <span style="color:#f92672">=</span> I(N)<span style="color:#f92672">*</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">-</span>p_transition) <span style="color:#f92672">.+</span> p_transition
+</span></span><span style="display:flex;"><span>    transitions <span style="color:#f92672">=</span> transitions <span style="color:#f92672">./</span> sum(transitions, dims<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    get_emission(μ) <span style="color:#f92672">=</span> MixtureModel(
+</span></span><span style="display:flex;"><span>        vcat(Normal(μ, σ), Uniform(<span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>,<span style="color:#ae81ff">5</span>)), [<span style="color:#ae81ff">0.99</span>, <span style="color:#ae81ff">0.01</span>]
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    emissions <span style="color:#f92672">=</span> [get_emission(mu) <span style="color:#66d9ef">for</span> mu <span style="color:#66d9ef">in</span> bins_cov]
+</span></span><span style="display:flex;"><span>    initial_state <span style="color:#f92672">=</span> ones(N)<span style="color:#f92672">/</span>N
+</span></span><span style="display:flex;"><span>    hmm <span style="color:#f92672">=</span> HMM(initial_state, transitions, emissions)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    obs_seq <span style="color:#f92672">=</span> log2<span style="color:#f92672">.</span>((counts <span style="color:#f92672">.+</span> <span style="color:#ae81ff">0.1</span>) <span style="color:#f92672">./</span> mean(counts))
+</span></span><span style="display:flex;"><span>    obs_seq <span style="color:#f92672">=</span> round<span style="color:#f92672">.</span>(obs_seq, digits <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    obs_seq <span style="color:#f92672">=</span> clamp<span style="color:#f92672">.</span>(obs_seq, extrema(bins_cov)<span style="color:#f92672">...</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    most_likely_state_seq, L <span style="color:#f92672">=</span> viterbi(hmm, obs_seq)
+</span></span><span style="display:flex;"><span>    seg <span style="color:#f92672">=</span> bins_cov[most_likely_state_seq]
+</span></span><span style="display:flex;"><span>    seg
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> update_plot(bins, counts, offsets, anim; segmentation <span style="color:#f92672">=</span> nothing)
+</span></span><span style="display:flex;"><span>    p <span style="color:#f92672">=</span> scatter(
+</span></span><span style="display:flex;"><span>        bins, log2<span style="color:#f92672">.</span>((counts <span style="color:#f92672">.+</span> <span style="color:#ae81ff">0.1</span>) <span style="color:#f92672">./</span> mean(counts)), 
+</span></span><span style="display:flex;"><span>        alpha <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.25</span>, markerstrokewidth <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, markersize <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>        size <span style="color:#f92672">=</span> (<span style="color:#ae81ff">800</span>,<span style="color:#ae81ff">300</span>), legend <span style="color:#f92672">=</span> false, margin <span style="color:#f92672">=</span> <span style="color:#ae81ff">15</span>Plots<span style="color:#f92672">.</span>px,
+</span></span><span style="display:flex;"><span>        xticks <span style="color:#f92672">=</span> (values(offsets), keys(offsets)),
+</span></span><span style="display:flex;"><span>        xlim <span style="color:#f92672">=</span> extrema(bins), 
+</span></span><span style="display:flex;"><span>        ylim <span style="color:#f92672">=</span> (<span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>,<span style="color:#ae81ff">5</span>),
+</span></span><span style="display:flex;"><span>        xrotation <span style="color:#f92672">=</span> <span style="color:#ae81ff">45</span>,
+</span></span><span style="display:flex;"><span>        ylabel <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Normalized coverage&#34;</span>,
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    annotate!(bins[<span style="color:#ae81ff">500</span>], <span style="color:#ae81ff">4</span>, text(<span style="color:#e6db74">&#34;Fragments : </span><span style="color:#e6db74">$</span>(sum(counts)<span style="color:#f92672">/</span><span style="color:#ae81ff">1000</span>)<span style="color:#e6db74">k&#34;</span>, <span style="color:#ae81ff">8</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">!</span>isnothing(segmentation)
+</span></span><span style="display:flex;"><span>        sel <span style="color:#f92672">=</span> segmentation <span style="color:#f92672">.!=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        plot!(bins[sel], segmentation[sel], c<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gray&#34;</span>, alpha <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.5</span>, linewidth<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">end</span>
+</span></span><span style="display:flex;"><span>    frame(anim)
+</span></span><span style="display:flex;"><span>    display(p)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> align_fastq(aligner, file, bins, counts, max_records)
+</span></span><span style="display:flex;"><span>    k <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    anim <span style="color:#f92672">=</span> Animation()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    p <span style="color:#f92672">=</span> Pipeline(
+</span></span><span style="display:flex;"><span>        Reader(FASTQ, File(file; second_in_pair <span style="color:#f92672">=</span> x <span style="color:#f92672">-&gt;</span> replace(x, <span style="color:#e6db74">&#34;_1&#34;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#34;_2&#34;</span>))),
+</span></span><span style="display:flex;"><span>        (reads<span style="color:#f92672">...</span>) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">begin</span>
+</span></span><span style="display:flex;"><span>            r1, r2 <span style="color:#f92672">=</span> BWA<span style="color:#f92672">.</span>align(aligner, reads)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">!</span>SAM<span style="color:#f92672">.</span>hasrefname(r1) <span style="color:#f92672">&amp;&amp;</span> <span style="color:#66d9ef">return</span> nothing
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">!</span>SAM<span style="color:#f92672">.</span>hasrefname(r2) <span style="color:#f92672">&amp;&amp;</span> <span style="color:#66d9ef">return</span> nothing
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">!</span>haskey(offsets, SAM<span style="color:#f92672">.</span>refname(r1)) <span style="color:#f92672">&amp;&amp;</span> <span style="color:#66d9ef">return</span> nothing
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            bin_idx <span style="color:#f92672">=</span> to_bin(SAM<span style="color:#f92672">.</span>refname(r1), SAM<span style="color:#f92672">.</span>position(r1))
+</span></span><span style="display:flex;"><span>            counts[bin_idx] <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> mod(k, <span style="color:#ae81ff">5_000</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>                segmentation <span style="color:#f92672">=</span> segment_profile(counts)
+</span></span><span style="display:flex;"><span>                update_plot(bins, counts, offsets, anim; segmentation <span style="color:#f92672">=</span> segmentation)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">end</span>
+</span></span><span style="display:flex;"><span>            k <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> BAM<span style="color:#f92672">.</span>Record(r1; header<span style="color:#f92672">=</span>header), BAM<span style="color:#f92672">.</span>Record(r2; header<span style="color:#f92672">=</span>header)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">end</span>,
+</span></span><span style="display:flex;"><span>        Writer(
+</span></span><span style="display:flex;"><span>            BAM, <span style="color:#e6db74">&#34;.&#34;</span>; 
+</span></span><span style="display:flex;"><span>            extension <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;.bam&#34;</span>, header <span style="color:#f92672">=</span> BWA<span style="color:#f92672">.</span>header(aligner), paired <span style="color:#f92672">=</span> false
+</span></span><span style="display:flex;"><span>        ),
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    out <span style="color:#f92672">=</span> run(p; max_records <span style="color:#f92672">=</span> max_records)
+</span></span><span style="display:flex;"><span>    gif(anim, <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">$</span>(file)<span style="color:#e6db74">_segmentation.gif&#34;</span>)
+</span></span><span style="display:flex;"><span>    out
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>file <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;SRR23498664_1.fastq&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>max_records <span style="color:#f92672">=</span> <span style="color:#ae81ff">500_000</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@time</span> align_fastq(aligner, file, bins, counts, max_records)
+</span></span></code></pre></div>
+</content>
+<p>
+  
+  <a href="https://jonathanBieler.github.io/tags/julialang/">#Julialang</a>
+  
+  <a href="https://jonathanBieler.github.io/tags/bioinformatics/">#Bioinformatics</a>
+  
+</p>
+
+  </main>
+  <footer>Made with <a href="https://github.com/janraasch/hugo-bearblog/">Hugo ʕ•ᴥ•ʔ Bear</a>
+</footer>
+
+    
+</body>
+
+</html>
