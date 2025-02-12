@@ -11,7 +11,7 @@
 (e.g, Depth-Anything-V2,
 MiDaS) are pretty good nowadays, to the point
 where they can be used for photo editing (even Photoshop use them).
-In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in Julia. The most obvious use case is to simulate bokeh (especially for smartphone that often can&rsquo;t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette . These can help to add depth to an image and emphasize its subject." />
+In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in Julia. The most obvious use case is to simulate bokeh (especially for smartphone that often can&rsquo;t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette. These can help to add depth to an image and emphasize its subject." />
 <meta name="keywords" content="julialang,photography," />
 
 
@@ -19,7 +19,7 @@ In this article, I explore some applications of a depth mask for phography using
   <meta property="og:site_name" content="jonathanBieler.github.io">
   <meta property="og:title" content="Exploring Depth-Based Raw Photo Processing in Julia">
   <meta property="og:description" content="Models for estimating depth from a single image (e.g, Depth-Anything-V2, MiDaS) are pretty good nowadays, to the point where they can be used for photo editing (even Photoshop use them).
-In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in Julia. The most obvious use case is to simulate bokeh (especially for smartphone that often can’t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette . These can help to add depth to an image and emphasize its subject.">
+In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in Julia. The most obvious use case is to simulate bokeh (especially for smartphone that often can’t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette. These can help to add depth to an image and emphasize its subject.">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="blog">
@@ -34,17 +34,17 @@ In this article, I explore some applications of a depth mask for phography using
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Exploring Depth-Based Raw Photo Processing in Julia">
   <meta name="twitter:description" content="Models for estimating depth from a single image (e.g, Depth-Anything-V2, MiDaS) are pretty good nowadays, to the point where they can be used for photo editing (even Photoshop use them).
-In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in Julia. The most obvious use case is to simulate bokeh (especially for smartphone that often can’t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette . These can help to add depth to an image and emphasize its subject.">
+In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in Julia. The most obvious use case is to simulate bokeh (especially for smartphone that often can’t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette. These can help to add depth to an image and emphasize its subject.">
 
 
 
 
   <meta itemprop="name" content="Exploring Depth-Based Raw Photo Processing in Julia">
   <meta itemprop="description" content="Models for estimating depth from a single image (e.g, Depth-Anything-V2, MiDaS) are pretty good nowadays, to the point where they can be used for photo editing (even Photoshop use them).
-In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in Julia. The most obvious use case is to simulate bokeh (especially for smartphone that often can’t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette . These can help to add depth to an image and emphasize its subject.">
+In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in Julia. The most obvious use case is to simulate bokeh (especially for smartphone that often can’t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette. These can help to add depth to an image and emphasize its subject.">
   <meta itemprop="datePublished" content="2024-11-01T15:14:00+02:00">
   <meta itemprop="dateModified" content="2024-11-01T15:14:00+02:00">
-  <meta itemprop="wordCount" content="601">
+  <meta itemprop="wordCount" content="600">
   <meta itemprop="keywords" content="Julialang,Photography">
 <meta name="referrer" content="no-referrer-when-downgrade" />
 
@@ -251,7 +251,7 @@ In this article, I explore some applications of a depth mask for phography using
 (e.g, <a href="https://github.com/DepthAnything/Depth-Anything-V2">Depth-Anything-V2</a>,
 <a href="https://github.com/isl-org/MiDaS">MiDaS</a>) are pretty good nowadays, to the point
 where they can be used for photo editing (even <a href="https://youtu.be/ljf8IhxqS20?t=69">Photoshop</a> use them).</p>
-<p>In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in <a href="https://julialang.org/downloads/">Julia</a>. The most obvious use case is to simulate bokeh (especially for smartphone that often can&rsquo;t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette . These can help to add depth to an image and emphasize its subject.</p>
+<p>In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in <a href="https://julialang.org/downloads/">Julia</a>. The most obvious use case is to simulate bokeh (especially for smartphone that often can&rsquo;t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette. These can help to add depth to an image and emphasize its subject.</p>
 <p>Julia is an excellent ecosystem for this since it provides all the necessary ingredients: raw file processing with <a href="https://github.com/jonathanBieler/LibRaw.jl">LibRaw</a>, GUI with integrated openGL plots with <a href="https://github.com/JuliaGtk/Gtk4.jl">Gtk4</a> and <a href="https://github.com/JuliaGtk/Gtk4Makie.jl">Gtk4Makie</a>, loading and running the depth estimation model with <a href="https://github.com/jw3126/ONNXRunTime.jl">ONNXRunTime</a>, easy and fast GPU and CPU kernels with <a href="https://github.com/JuliaGPU/CUDA.jl">CUDA.jl</a> and <a href="https://github.com/JuliaSIMD/LoopVectorization.jl">LoopVectorization.jl</a> and generally easy and fun development experience (minus the loading times, which becomes significant with such a stack).</p>
 <p><img src="/focal.jl/DSC03929.PNG" alt="targets"></p>
 
