@@ -4,22 +4,29 @@
     <title>Tags on jonathanBieler.github.io</title>
     <link>https://jonathanBieler.github.io/tags/</link>
     <description>Recent content in Tags on jonathanBieler.github.io</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 08 Apr 2024 15:14:00 +0200</lastBuildDate>
+    <lastBuildDate>Fri, 01 Nov 2024 15:14:00 +0200</lastBuildDate>
     <atom:link href="https://jonathanBieler.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Julialang</title>
+      <link>https://jonathanBieler.github.io/tags/julialang/</link>
+      <pubDate>Fri, 01 Nov 2024 15:14:00 +0200</pubDate>
+      <guid>https://jonathanBieler.github.io/tags/julialang/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Photography</title>
+      <link>https://jonathanBieler.github.io/tags/photography/</link>
+      <pubDate>Fri, 01 Nov 2024 15:14:00 +0200</pubDate>
+      <guid>https://jonathanBieler.github.io/tags/photography/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Bioinformatics</title>
       <link>https://jonathanBieler.github.io/tags/bioinformatics/</link>
       <pubDate>Mon, 08 Apr 2024 15:14:00 +0200</pubDate>
       <guid>https://jonathanBieler.github.io/tags/bioinformatics/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Julialang</title>
-      <link>https://jonathanBieler.github.io/tags/julialang/</link>
-      <pubDate>Mon, 08 Apr 2024 15:14:00 +0200</pubDate>
-      <guid>https://jonathanBieler.github.io/tags/julialang/</guid>
       <description></description>
     </item>
   </channel>

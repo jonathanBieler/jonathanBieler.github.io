@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Exploring Depth-Based Raw Photo Processing in Julia | jonathanBieler.github.io</title>
+<meta name="title" content="Exploring Depth-Based Raw Photo Processing in Julia" />
+<meta name="description" content="Models for estimating depth from a single image
+(e.g, Depth-Anything-V2,
+MiDaS) are pretty good nowadays, to the point
+where they can be used for photo editing (even Photoshop use them).
+In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in Julia. The most obvious use case is to simulate bokeh (especially for smartphone that often can&rsquo;t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette . These can help to add depth to an image and emphasize its subject." />
+<meta name="keywords" content="julialang,photography," />
+
+
+<meta property="og:url" content="https://jonathanBieler.github.io/blog/focal.jl/">
+  <meta property="og:site_name" content="jonathanBieler.github.io">
+  <meta property="og:title" content="Exploring Depth-Based Raw Photo Processing in Julia">
+  <meta property="og:description" content="Models for estimating depth from a single image (e.g, Depth-Anything-V2, MiDaS) are pretty good nowadays, to the point where they can be used for photo editing (even Photoshop use them).
+In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in Julia. The most obvious use case is to simulate bokeh (especially for smartphone that often can’t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette . These can help to add depth to an image and emphasize its subject.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blog">
+    <meta property="article:published_time" content="2024-11-01T15:14:00+02:00">
+    <meta property="article:modified_time" content="2024-11-01T15:14:00+02:00">
+    <meta property="article:tag" content="Julialang">
+    <meta property="article:tag" content="Photography">
+
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Exploring Depth-Based Raw Photo Processing in Julia">
+  <meta name="twitter:description" content="Models for estimating depth from a single image (e.g, Depth-Anything-V2, MiDaS) are pretty good nowadays, to the point where they can be used for photo editing (even Photoshop use them).
+In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in Julia. The most obvious use case is to simulate bokeh (especially for smartphone that often can’t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette . These can help to add depth to an image and emphasize its subject.">
+
+
+
+
+  <meta itemprop="name" content="Exploring Depth-Based Raw Photo Processing in Julia">
+  <meta itemprop="description" content="Models for estimating depth from a single image (e.g, Depth-Anything-V2, MiDaS) are pretty good nowadays, to the point where they can be used for photo editing (even Photoshop use them).
+In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in Julia. The most obvious use case is to simulate bokeh (especially for smartphone that often can’t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette . These can help to add depth to an image and emphasize its subject.">
+  <meta itemprop="datePublished" content="2024-11-01T15:14:00+02:00">
+  <meta itemprop="dateModified" content="2024-11-01T15:14:00+02:00">
+  <meta itemprop="wordCount" content="601">
+  <meta itemprop="keywords" content="Julialang,Photography">
+<meta name="referrer" content="no-referrer-when-downgrade" />
+
+  <style>
+  body {
+    font-family: Verdana, sans-serif;
+    margin: auto;
+    padding: 20px;
+    max-width: 720px;
+    text-align: left;
+    background-color: #fff;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
+    color: #444;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  strong,
+  b {
+    color: #222;
+  }
+
+  a {
+    color: #3273dc;
+     
+  }
+
+  .title {
+    text-decoration: none;
+    border: 0;
+  }
+
+  .title span {
+    font-weight: 400;
+  }
+
+  nav a {
+    margin-right: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  input {
+    font-size: 16px;
+  }
+
+  content {
+    line-height: 1.6;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  code {
+    padding: 2px 5px;
+    background-color: #f2f2f2;
+  }
+
+  pre code {
+    color: #222;
+    display: block;
+    padding: 20px;
+    white-space: pre-wrap;
+    font-size: 14px;
+    overflow-x: auto;
+  }
+
+  div.highlight pre {
+    background-color: initial;
+    color: initial;
+  }
+
+  div.highlight code {
+    background-color: unset;
+    color: unset;
+  }
+
+  blockquote {
+    border-left: 1px solid #999;
+    color: #222;
+    padding-left: 20px;
+    font-style: italic;
+  }
+
+  footer {
+    padding: 25px;
+    text-align: center;
+  }
+
+  .helptext {
+    color: #777;
+    font-size: small;
+  }
+
+  .errorlist {
+    color: #eba613;
+    font-size: small;
+  }
+
+   
+  ul.blog-posts {
+    list-style-type: none;
+    padding: unset;
+  }
+
+  ul.blog-posts li {
+    display: flex;
+  }
+
+  ul.blog-posts li span {
+    flex: 0 0 130px;
+  }
+
+  ul.blog-posts li a:visited {
+    color: #8b6fcb;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #333;
+      color: #ddd;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    strong,
+    b {
+      color: #eee;
+    }
+
+    a {
+      color: #8cc2dd;
+    }
+
+    code {
+      background-color: #777;
+    }
+
+    pre code {
+      color: #ddd;
+    }
+
+    blockquote {
+      color: #ccc;
+    }
+
+    textarea,
+    input {
+      background-color: #252525;
+      color: #ddd;
+    }
+
+    .helptext {
+      color: #aaa;
+    }
+  }
+
+</style>
+
+</head>
+
+<body>
+  <header><a href="/" class="title">
+  <h2>jonathanBieler.github.io</h2>
+</a>
+<nav><a href="/">Home</a>
+
+
+<a href="/blog">Blog</a>
+
+</nav>
+</header>
+  <main>
+
+<h1>Exploring Depth-Based Raw Photo Processing in Julia</h1>
+<p>
+  <i>
+    <time datetime='2024-11-01' pubdate>
+      01 Nov, 2024
+    </time>
+  </i>
+</p>
+
+<content>
+  <p>Models for estimating depth from a single image
+(e.g, <a href="https://github.com/DepthAnything/Depth-Anything-V2">Depth-Anything-V2</a>,
+<a href="https://github.com/isl-org/MiDaS">MiDaS</a>) are pretty good nowadays, to the point
+where they can be used for photo editing (even <a href="https://youtu.be/ljf8IhxqS20?t=69">Photoshop</a> use them).</p>
+<p>In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in <a href="https://julialang.org/downloads/">Julia</a>. The most obvious use case is to simulate bokeh (especially for smartphone that often can&rsquo;t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette . These can help to add depth to an image and emphasize its subject.</p>
+<p>Julia is an excellent ecosystem for this since it provides all the necessary ingredients: raw file processing with <a href="https://github.com/jonathanBieler/LibRaw.jl">LibRaw</a>, GUI with integrated openGL plots with <a href="https://github.com/JuliaGtk/Gtk4.jl">Gtk4</a> and <a href="https://github.com/JuliaGtk/Gtk4Makie.jl">Gtk4Makie</a>, loading and running the depth estimation model with <a href="https://github.com/jw3126/ONNXRunTime.jl">ONNXRunTime</a>, easy and fast GPU and CPU kernels with <a href="https://github.com/JuliaGPU/CUDA.jl">CUDA.jl</a> and <a href="https://github.com/JuliaSIMD/LoopVectorization.jl">LoopVectorization.jl</a> and generally easy and fun development experience (minus the loading times, which becomes significant with such a stack).</p>
+<p><img src="/focal.jl/DSC03929.PNG" alt="targets"></p>
+
+ 
+<figcaption style="color:gray; font-size:small; font-style: italic;">Image from akgt94 on <a href="https://discuss.pixls.us/t/joshua-tree-mojave-desert/46435">discuss.pixls.us</a></figcaption>
+
+<h2 id="using-depth-mask-to-modify-exposure">Using depth mask to modify exposure</h2>
+<p>The most basic usage of the depth mask is to use it to darken or brighten the image depening on the distance to the camera. Brightening based on depth looks similar to using a flash or another light source,
+while darkening acts more like a vignette.</p>
+
+ 
+<video width=100% controls autoplay>
+    <source src="/focal.jl/depth_exposure.webm" type="video/webm">
+    Your browser does not support the video tag.  
+</video>
+
+
+ 
+<figcaption style="color:gray; font-size:small; font-style: italic;">Image from Sascha Eden on <a href="https://discuss.pixls.us/t/blue-oldtimer-and-green-windows/30175">discuss.pixls.us</a></figcaption>
+
+<h2 id="using-depth-mask-to-add-fog">Using depth mask to add fog</h2>
+<p>Another application is add fog to an image, in my implementation I simply add white to the raw data based on the depth mask. This can work well for some type of images, and can help to tame a busy background. For example here I tried to emphasize the plants in the foreground and add a bit of haze.</p>
+
+ 
+<video width=100% controls autoplay>
+    <source src="/focal.jl/fog.webm" type="video/webm">
+    Your browser does not support the video tag.  
+</video>
+
+<h2 id="using-depth-of-field-to-modify-exposure">Using depth-of-field to modify exposure</h2>
+<p>The depth mask can be further processed to produce a depth-of-field mask, by setting a distance for the focal plane and using some function to compute how the focus falls off from there.
+This mask can be used for bokeh but it can also be used to tweak exposure. This gives more control over which part of the image gets affected, compared to using only the depth mask. In this
+example I try to emphasize the tree by darkening parts of the background :</p>
+
+ 
+<video width=100% controls autoplay>
+    <source src="/focal.jl/dof_lighting.webm" type="video/webm">
+    Your browser does not support the video tag.  
+</video>
+
+<p>Before and after the adjustment :</p>
+<p><img src="/focal.jl/tree_before_after.jpg" alt="targets"></p>
+<h2 id="using-depth-of-field-to-add-bokeh">Using depth of field to add bokeh</h2>
+<p>Of course it&rsquo;s possible to use the depth of field mask to add bokeh to an image. In practice I found that the depth mask wasn&rsquo;t precise enough for portrait style picture (my rough bokeh simulation probably doesn&rsquo;t help). On my machine the maximum resolution I could run the model on was 1190x910.
+In some cases it can help to emphasize part of the image (here one of the statue), even though it often ends up looking like a tilt-shift shots :</p>
+<p><img src="/focal.jl/bokehbefore.jpg" alt="targets"></p>
+<p><img src="/focal.jl/bokehafter.png" alt="targets"></p>
+
+ 
+<figcaption style="color:gray; font-size:small; font-style: italic;">Image from anon42681393 on <a href="https://discuss.pixls.us/t/in-the-style-of-giorgio-de-chirico-rome-2017/35611">discuss.pixls.us</a></figcaption>
+
+<h2 id="conclusion">Conclusion</h2>
+<p>In my opinion fog and exposure manipulation are the most useful application of the depth-mask, alhough these can be probably be achieved with traditional masks as well.
+A more advanced for model (simulating absorption and scattering using colors from the image) would be interresting to try.
+The model file is 300MB and running it on the GPU requires a good amount of VRAM, so while the technical requirements are reasonable, it doesn&rsquo;t come for free.</p>
+<h2 id="source-code">Source code</h2>
+<p>Code is available here (highly experimental) : <a href="https://github.com/jonathanBieler/Focal.jl">https://github.com/jonathanBieler/Focal.jl</a></p>
+
+</content>
+<p>
+  
+  <a href="https://jonathanBieler.github.io/tags/julialang/">#Julialang</a>
+  
+  <a href="https://jonathanBieler.github.io/tags/photography/">#Photography</a>
+  
+</p>
+
+  </main>
+  <footer>Made with <a href="https://github.com/janraasch/hugo-bearblog/">Hugo ʕ•ᴥ•ʔ Bear</a>
+</footer>
+
+    
+</body>
+
+</html>
