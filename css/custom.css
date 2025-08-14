@@ -1,0 +1,53 @@
+/* Main post title */
+.title {
+    color: #4A5A6A;      /* elegant blue-gray */
+    font-variant: small-caps;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-bottom: 0.5em;
+}
+
+body {
+  background-color: rgb(247, 245, 241);
+}
+
+/* Regular headers */
+h1, h2 {
+    color: #3D3D3D;      /* dark gray */
+    font-weight: 500;
+    margin-top: 1.2em;
+    margin-bottom: 0.5em;
+}
+
+/* Body text */
+body, p {
+    color: #2E2E2E;      /* readable dark gray */
+    line-height: 1.6;
+}
+
+/* Links */
+a {
+    color: #3b749d;      /* soft teal */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #2d5b7b;      /* slightly darker teal */
+}
+
+ul.blog-posts li a:visited {
+    color: #2d5b7b;      /* slightly darker teal */
+}
+
+/* Optional: secondary headers h3, h4 */
+h3, h4 {
+    color: #5A5A5A;      /* medium gray */
+    font-weight: 500;
+}
+
+/* Small meta text, dates, etc. */
+.meta, .post-meta {
+    color: #888888;      /* soft gray */
+    font-size: 0.9em;
+}
