@@ -7,37 +7,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>From FASTQ to CNV calls in Julia | jonathanBieler.github.io</title>
 <meta name="title" content="From FASTQ to CNV calls in Julia" />
-<meta name="description" content="I&rsquo;ve recently worked on Julia bindings for BWA, allowing to align sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates to XAM.jl and BioRecordsProcessing.jl will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.
+<meta name="description" content="I&rsquo;ve recently worked on Julia bindings for BWA, allowing to align
+sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates
+to XAM.jl and BioRecordsProcessing.jl
+will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.
 To illustrate this I will showcase online whole-genome sequencing (WGS) copy number variation (CNV) calling on a mouse kidney tumor sample.
 Briefly, we need to do the following :" />
 <meta name="keywords" content="julialang,bioinformatics," />
 
 
-<meta property="og:title" content="From FASTQ to CNV calls in Julia" />
-<meta property="og:description" content="I&rsquo;ve recently worked on Julia bindings for BWA, allowing to align sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates to XAM.jl and BioRecordsProcessing.jl will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.
+<meta property="og:url" content="https://jonathanBieler.github.io/blog/fastq2cnv/">
+  <meta property="og:site_name" content="jonathanBieler.github.io">
+  <meta property="og:title" content="From FASTQ to CNV calls in Julia">
+  <meta property="og:description" content="I’ve recently worked on Julia bindings for BWA, allowing to align sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates to XAM.jl and BioRecordsProcessing.jl will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.
 To illustrate this I will showcase online whole-genome sequencing (WGS) copy number variation (CNV) calling on a mouse kidney tumor sample.
-Briefly, we need to do the following :" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://jonathanBieler.github.io/blog/fastq2cnv/" /><meta property="article:section" content="blog" />
-<meta property="article:published_time" content="2024-04-08T15:14:00+02:00" />
-<meta property="article:modified_time" content="2024-04-08T15:14:00+02:00" />
+Briefly, we need to do the following :">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blog">
+    <meta property="article:published_time" content="2024-04-08T15:14:00+02:00">
+    <meta property="article:modified_time" content="2024-04-08T15:14:00+02:00">
+    <meta property="article:tag" content="Julialang">
+    <meta property="article:tag" content="Bioinformatics">
 
 
 
-<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="From FASTQ to CNV calls in Julia"/>
-<meta name="twitter:description" content="I&rsquo;ve recently worked on Julia bindings for BWA, allowing to align sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates to XAM.jl and BioRecordsProcessing.jl will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="From FASTQ to CNV calls in Julia">
+  <meta name="twitter:description" content="I’ve recently worked on Julia bindings for BWA, allowing to align sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates to XAM.jl and BioRecordsProcessing.jl will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.
 To illustrate this I will showcase online whole-genome sequencing (WGS) copy number variation (CNV) calling on a mouse kidney tumor sample.
-Briefly, we need to do the following :"/>
+Briefly, we need to do the following :">
 
 
 
-<meta itemprop="name" content="From FASTQ to CNV calls in Julia">
-<meta itemprop="description" content="I&rsquo;ve recently worked on Julia bindings for BWA, allowing to align sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates to XAM.jl and BioRecordsProcessing.jl will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.
+
+  <meta itemprop="name" content="From FASTQ to CNV calls in Julia">
+  <meta itemprop="description" content="I’ve recently worked on Julia bindings for BWA, allowing to align sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates to XAM.jl and BioRecordsProcessing.jl will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.
 To illustrate this I will showcase online whole-genome sequencing (WGS) copy number variation (CNV) calling on a mouse kidney tumor sample.
-Briefly, we need to do the following :"><meta itemprop="datePublished" content="2024-04-08T15:14:00+02:00" />
-<meta itemprop="dateModified" content="2024-04-08T15:14:00+02:00" />
-<meta itemprop="wordCount" content="1412">
-<meta itemprop="keywords" content="julialang,bioinformatics," />
+Briefly, we need to do the following :">
+  <meta itemprop="datePublished" content="2024-04-08T15:14:00+02:00">
+  <meta itemprop="dateModified" content="2024-04-08T15:14:00+02:00">
+  <meta itemprop="wordCount" content="1412">
+  <meta itemprop="keywords" content="Julialang,Bioinformatics">
 <meta name="referrer" content="no-referrer-when-downgrade" />
 
   <style>
@@ -219,6 +231,7 @@ Briefly, we need to do the following :"><meta itemprop="datePublished" content="
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" rel="stylesheet">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.5/js/lightbox-plus-jquery.min.js" integrity="sha512-/IJVg2oav2TggiFftaMSPgttHNmgu/0RSGP64Nm7wqYwjkxj4hAHLRMJi3QNTa22f4pIkvTsCpB848HEilV6MA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 </head>
 
 <body>
