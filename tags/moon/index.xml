@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Moon on jonathanBieler.github.io</title>
+    <link>https://jonathanBieler.github.io/tags/moon/</link>
+    <description>Recent content in Moon on jonathanBieler.github.io</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 13 Aug 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://jonathanBieler.github.io/tags/moon/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Catching the moon at the right time with Julia</title>
+      <link>https://jonathanBieler.github.io/blog/moon_and_sun/</link>
+      <pubDate>Wed, 13 Aug 2025 00:00:00 +0000</pubDate>
+      <guid>https://jonathanBieler.github.io/blog/moon_and_sun/</guid>
+      <description>The moon on a night sky is surprisingly bright, especially for a camera with limited dynamic range. And there&amp;rsquo;s only so many compositions one can do of the moon on a naked sky. For those reasons taking moon pictures at sunrise or sunset, when the moon is close to the horizon and its relative brightness is comparable to ambient light often brings more interesting (or at least varied) results.</description>
+    </item>
+  </channel>
+</rss>

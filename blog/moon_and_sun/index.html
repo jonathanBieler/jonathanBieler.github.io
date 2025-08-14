@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Catching the moon at the right time with Julia | jonathanBieler.github.io</title>
+<meta name="title" content="Catching the moon at the right time with Julia" />
+<meta name="description" content="The moon on a night sky is surprisingly bright, especially for a camera with limited dynamic range. And there&rsquo;s only so many compositions one can do of the moon on a naked sky. For those reasons taking moon pictures at sunrise or sunset, when the moon is close to the horizon and its relative brightness is comparable to ambient light often brings more interesting (or at least varied) results." />
+<meta name="keywords" content="julia,astronomy,photography,moon," />
+
+
+<meta property="og:title" content="Catching the moon at the right time with Julia" />
+<meta property="og:description" content="The moon on a night sky is surprisingly bright, especially for a camera with limited dynamic range. And there&rsquo;s only so many compositions one can do of the moon on a naked sky. For those reasons taking moon pictures at sunrise or sunset, when the moon is close to the horizon and its relative brightness is comparable to ambient light often brings more interesting (or at least varied) results." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://jonathanBieler.github.io/blog/moon_and_sun/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2025-08-13T00:00:00+00:00" />
+<meta property="article:modified_time" content="2025-08-13T00:00:00+00:00" />
+
+
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Catching the moon at the right time with Julia"/>
+<meta name="twitter:description" content="The moon on a night sky is surprisingly bright, especially for a camera with limited dynamic range. And there&rsquo;s only so many compositions one can do of the moon on a naked sky. For those reasons taking moon pictures at sunrise or sunset, when the moon is close to the horizon and its relative brightness is comparable to ambient light often brings more interesting (or at least varied) results."/>
+
+
+
+<meta itemprop="name" content="Catching the moon at the right time with Julia">
+<meta itemprop="description" content="The moon on a night sky is surprisingly bright, especially for a camera with limited dynamic range. And there&rsquo;s only so many compositions one can do of the moon on a naked sky. For those reasons taking moon pictures at sunrise or sunset, when the moon is close to the horizon and its relative brightness is comparable to ambient light often brings more interesting (or at least varied) results."><meta itemprop="datePublished" content="2025-08-13T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2025-08-13T00:00:00+00:00" />
+<meta itemprop="wordCount" content="1247">
+<meta itemprop="keywords" content="julia,astronomy,photography,moon," />
+<meta name="referrer" content="no-referrer-when-downgrade" />
+
+  <style>
+  body {
+    font-family: Verdana, sans-serif;
+    margin: auto;
+    padding: 20px;
+    max-width: 720px;
+    text-align: left;
+    background-color: #fff;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
+    color: #444;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  strong,
+  b {
+    color: #222;
+  }
+
+  a {
+    color: #3273dc;
+     
+  }
+
+  .title {
+    text-decoration: none;
+    border: 0;
+  }
+
+  .title span {
+    font-weight: 400;
+  }
+
+  nav a {
+    margin-right: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  input {
+    font-size: 16px;
+  }
+
+  content {
+    line-height: 1.6;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  code {
+    padding: 2px 5px;
+    background-color: #f2f2f2;
+  }
+
+  pre code {
+    color: #222;
+    display: block;
+    padding: 20px;
+    white-space: pre-wrap;
+    font-size: 14px;
+    overflow-x: auto;
+  }
+
+  div.highlight pre {
+    background-color: initial;
+    color: initial;
+  }
+
+  div.highlight code {
+    background-color: unset;
+    color: unset;
+  }
+
+  blockquote {
+    border-left: 1px solid #999;
+    color: #222;
+    padding-left: 20px;
+    font-style: italic;
+  }
+
+  footer {
+    padding: 25px;
+    text-align: center;
+  }
+
+  .helptext {
+    color: #777;
+    font-size: small;
+  }
+
+  .errorlist {
+    color: #eba613;
+    font-size: small;
+  }
+
+   
+  ul.blog-posts {
+    list-style-type: none;
+    padding: unset;
+  }
+
+  ul.blog-posts li {
+    display: flex;
+  }
+
+  ul.blog-posts li span {
+    flex: 0 0 130px;
+  }
+
+  ul.blog-posts li a:visited {
+    color: #8b6fcb;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #333;
+      color: #ddd;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    strong,
+    b {
+      color: #eee;
+    }
+
+    a {
+      color: #8cc2dd;
+    }
+
+    code {
+      background-color: #777;
+    }
+
+    pre code {
+      color: #ddd;
+    }
+
+    blockquote {
+      color: #ccc;
+    }
+
+    textarea,
+    input {
+      background-color: #252525;
+      color: #ddd;
+    }
+
+    .helptext {
+      color: #aaa;
+    }
+  }
+
+</style>
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" rel="stylesheet">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.5/js/lightbox-plus-jquery.min.js" integrity="sha512-/IJVg2oav2TggiFftaMSPgttHNmgu/0RSGP64Nm7wqYwjkxj4hAHLRMJi3QNTa22f4pIkvTsCpB848HEilV6MA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+  <header><a href="/" class="title">
+  <h2>jonathanBieler.github.io</h2>
+</a>
+<nav><a href="/">Home</a>
+
+
+<a href="/blog">Blog</a>
+
+</nav>
+</header>
+  <main>
+
+<h1>Catching the moon at the right time with Julia</h1>
+<p>
+  <i>
+    <time datetime='2025-08-13' pubdate>
+      13 Aug, 2025
+    </time>
+  </i>
+</p>
+
+<content>
+  
+ 
+<div style="text-align:center;">
+<a href="/sun_and_moon/53487504254_2923ea05f5_c.jpg" data-lightbox="targets" data-title="Moonrise seen from Lyon">
+    <img src="/sun_and_moon/53487504254_2923ea05f5_c.jpg" alt="targets" style="max-width:100%; height:auto;">
+</a>
+</div>
+
+<p>The moon on a night sky is surprisingly bright, especially for a camera with limited dynamic range. And there&rsquo;s only so many compositions one can do of the moon on a naked sky.
+For those reasons taking moon pictures at sunrise or sunset, when the moon is close to the horizon and its relative brightness is comparable to ambient light often brings more interesting (or at least varied) results.</p>
+<p>Maybe I haven&rsquo;t searched well enough but I haven&rsquo;t found a tool giving you the days of the year at which moon rise/set coincide with the sun rise/set for a given location. In any case that&rsquo;s an excuse for a fun Julia project.</p>
+<p><strong>Disclaimer:</strong> I&rsquo;m not a physicist or professional astronomer, if you&rsquo;re planning something critical (like a rocket launch), maybe double-check with actual experts!</p>
+<h2 id="the-plan">The Plan</h2>
+<p>The idea is simple: find dates when the sun and moon rise or set within a short time window of each other. This gives us those perfect conditions where you get a nicely lit sky and a visible moon.
+The main functionalities, namely the moon and sun position at a given date, are available via the <a href="https://juliaastro.org/AstroLib.jl/stable/">AstroLib</a> package.</p>
+<h2 id="setup-and-converting-times">Setup and converting times</h2>
+<p>First, let&rsquo;s define where we&rsquo;re observing from. I&rsquo;m using Lyon, France as the example location:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span><span style="color:#66d9ef">using</span> AstroLib, TimeZones
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> Dates, Plots
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Location setup: latitude, longitude in degrees</span>
+</span></span><span style="display:flex;"><span>latitude <span style="color:#f92672">=</span> <span style="color:#ae81ff">45.7640</span>     <span style="color:#75715e"># Lyon</span>
+</span></span><span style="display:flex;"><span>longitude <span style="color:#f92672">=</span> <span style="color:#ae81ff">4.8357</span>
+</span></span><span style="display:flex;"><span>obs_altitude <span style="color:#f92672">=</span> <span style="color:#ae81ff">212</span>
+</span></span><span style="display:flex;"><span>local_tz <span style="color:#f92672">=</span> TimeZone(<span style="color:#e6db74">&#34;Europe/Paris&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>start_date <span style="color:#f92672">=</span> Date(<span style="color:#ae81ff">2025</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">4</span>)
+</span></span></code></pre></div><p>We also need our timezone to convert between universal time and our local observations.</p>
+<p>AstroLib routines take time in Julian days, which surprinzingly aren&rsquo;t Julia specific units,
+but units used by <a href="https://en.wikipedia.org/wiki/Julian_day">astronomers</a>. We can convert from a Julia date
+to Julian days with <code>jdcnv</code> :</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span>date_to_jd(date) <span style="color:#f92672">=</span> jdcnv(DateTime(date))
+</span></span></code></pre></div><h2 id="computing-altitudes">Computing Altitudes</h2>
+<p>The <code>get_altitude</code> function is doing the real work here. It takes a Julian date and a position function (<code>sunpos</code> or <code>moonpos</code>), gets the celestial coordinates, and converts them to altitude above our horizon.
+When altitude crosses zero, we have a rise or set event!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> get_altitude(jd, posfun<span style="color:#f92672">=</span>sunpos)
+</span></span><span style="display:flex;"><span>    sun_ra_dec <span style="color:#f92672">=</span> posfun(jd)
+</span></span><span style="display:flex;"><span>    sun_alt, sun_az, _ <span style="color:#f92672">=</span> eq2hor(sun_ra_dec[<span style="color:#ae81ff">1</span>], sun_ra_dec[<span style="color:#ae81ff">2</span>], jd, latitude, longitude, obs_altitude)
+</span></span><span style="display:flex;"><span>    sun_alt
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span></code></pre></div><p>The <code>sunpos</code> function returns the right ascension and declination of the Sun at a given date, right ascension and declination being angles defining a direction
+on the <a href="https://en.wikipedia.org/wiki/Equatorial_coordinate_system#Spherical_coordinates">celestial sphere</a>.</p>
+<p>Then the <code>eq2hor</code> converts these two angles into an alitude (angle to the horizon) for our local position.</p>
+<p>We can make a plot of the altitude for a day :</p>
+<p><img src="/sun_and_moon/altitudes.png" alt="targets"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span>start_date <span style="color:#f92672">=</span> Date(<span style="color:#ae81ff">2025</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>jd_start <span style="color:#f92672">=</span> date_to_jd(start_date)
+</span></span><span style="display:flex;"><span>jd_end   <span style="color:#f92672">=</span> date_to_jd(start_date <span style="color:#f92672">+</span> Day(<span style="color:#ae81ff">1</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>t <span style="color:#f92672">=</span> <span style="color:#66d9ef">LinRange</span>(jd_start, jd_end, <span style="color:#ae81ff">100</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p <span style="color:#f92672">=</span> plot(t, get_altitude<span style="color:#f92672">.</span>(t, sunpos), label <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Sun altitude&#34;</span>, xlabel <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Julian time&#34;</span>)
+</span></span><span style="display:flex;"><span>plot!(t, get_altitude<span style="color:#f92672">.</span>(t, moonpos), label <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Moon altitude&#34;</span>, ylabel <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Altitude&#34;</span>)
+</span></span><span style="display:flex;"><span>hline!([<span style="color:#ae81ff">0</span>], label <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Horizon&#34;</span>,c<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gray&#34;</span>, dpi<span style="color:#f92672">=</span><span style="color:#ae81ff">150</span>)
+</span></span></code></pre></div><h2 id="finding-the-crossings">Finding the Crossings</h2>
+<p>To find the horizon crossings I&rsquo;m using a basic zero-crossing algorithm, with a 1 minute time resolution.
+I&rsquo;ve tried root finding with Roots.jl but it surprisingly was getting stuck sometimes. I don&rsquo;t need more precision anyway.</p>
+<p>When altitude goes from negative to positive, that&rsquo;s a rise. Positive to negative? That&rsquo;s a set. Simple but effective.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> find_crossing(start_date, num_days, posfun)
+</span></span><span style="display:flex;"><span>    jd_start <span style="color:#f92672">=</span> date_to_jd(start_date)
+</span></span><span style="display:flex;"><span>    jd_end <span style="color:#f92672">=</span> date_to_jd(start_date <span style="color:#f92672">+</span> Day(num_days))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    times <span style="color:#f92672">=</span> <span style="color:#66d9ef">LinRange</span>(jd_start, jd_end, <span style="color:#ae81ff">24</span><span style="color:#f92672">*</span><span style="color:#ae81ff">60</span><span style="color:#f92672">*</span>num_days) <span style="color:#75715e"># 1 minute resolution</span>
+</span></span><span style="display:flex;"><span>    altitudes <span style="color:#f92672">=</span> get_altitude<span style="color:#f92672">.</span>(times, posfun)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    crossings <span style="color:#f92672">=</span>  <span style="color:#a6e22e">@NamedTuple</span>{<span style="color:#66d9ef">time</span><span style="color:#f92672">::</span><span style="color:#66d9ef">DateTime</span>, <span style="color:#66d9ef">event</span><span style="color:#f92672">::</span><span style="color:#66d9ef">Symbol</span>}[]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">:</span>length(altitudes)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> altitudes[i<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> altitudes[i] <span style="color:#f92672">≥</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>            push!(crossings, (
+</span></span><span style="display:flex;"><span>                time <span style="color:#f92672">=</span> daycnv(times[i]),
+</span></span><span style="display:flex;"><span>                event <span style="color:#f92672">=</span> <span style="color:#e6db74">:rise</span>,
+</span></span><span style="display:flex;"><span>            ))
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">elseif</span> altitudes[i<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">≥</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> altitudes[i] <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>            push!(crossings, (
+</span></span><span style="display:flex;"><span>                time <span style="color:#f92672">=</span> daycnv(times[i]),
+</span></span><span style="display:flex;"><span>                event <span style="color:#f92672">=</span> <span style="color:#e6db74">:set</span>,
+</span></span><span style="display:flex;"><span>            ))
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">end</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">end</span>
+</span></span><span style="display:flex;"><span>    crossings
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span></code></pre></div><p><img src="/sun_and_moon/altitudes_crossings.png" alt="targets"></p>
+<h2 id="moon--sun-coincidences">Moon &amp; Sun Coincidences</h2>
+<p>No need for sophistication either here, we&rsquo;ll just test every possible pairs of crossing for a year; if they occur within 30 minutes of each other, we keep them.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span><span style="color:#75715e"># Compute crossings for a full year</span>
+</span></span><span style="display:flex;"><span>d <span style="color:#f92672">=</span> <span style="color:#ae81ff">360</span>
+</span></span><span style="display:flex;"><span>sun_crossings  <span style="color:#f92672">=</span> find_crossing(start_date, d, sunpos)
+</span></span><span style="display:flex;"><span>moon_crossings <span style="color:#f92672">=</span> find_crossing(start_date, d, moonpos)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Find coincidences within a 30-minute window</span>
+</span></span><span style="display:flex;"><span>coincidences <span style="color:#f92672">=</span> <span style="color:#66d9ef">Tuple</span>{<span style="color:#66d9ef">T</span>,<span style="color:#66d9ef">T</span>}[]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> s <span style="color:#66d9ef">in</span> sun_crossings
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> m <span style="color:#66d9ef">in</span> moon_crossings
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> abs(s<span style="color:#f92672">.</span>time <span style="color:#f92672">-</span> m<span style="color:#f92672">.</span>time) <span style="color:#f92672">&lt;</span> Minute(<span style="color:#ae81ff">30</span>)
+</span></span><span style="display:flex;"><span>            push!(coincidences, (s,m))
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">end</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span></code></pre></div><h2 id="pretty-printing-the-results">Pretty Printing the Results</h2>
+<p>Finally, let&rsquo;s format the results nicely, including the moon phase (illuminated fraction) :</p>
+<!-- raw HTML omitted -->
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Sun Event</th>
+<th>Sun Time</th>
+<th>Moon Event</th>
+<th>Moon Time</th>
+<th>Moon Phase (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8 Aug, 2025</td>
+<td>sunset</td>
+<td>20h59</td>
+<td>moonrise</td>
+<td>20h53</td>
+<td>99.6</td>
+</tr>
+<tr>
+<td>9 Aug, 2025</td>
+<td>sunrise</td>
+<td>06h38</td>
+<td>moonset</td>
+<td>06h25</td>
+<td>99.9</td>
+</tr>
+<tr>
+<td>9 Aug, 2025</td>
+<td>sunset</td>
+<td>20h58</td>
+<td>moonrise</td>
+<td>21h18</td>
+<td>99.7</td>
+</tr>
+<tr>
+<td>21 Aug, 2025</td>
+<td>sunset</td>
+<td>20h38</td>
+<td>moonset</td>
+<td>20h12</td>
+<td>2.6</td>
+</tr>
+<tr>
+<td>22 Aug, 2025</td>
+<td>sunset</td>
+<td>20h36</td>
+<td>moonset</td>
+<td>20h35</td>
+<td>0.3</td>
+</tr>
+<tr>
+<td>23 Aug, 2025</td>
+<td>sunrise</td>
+<td>06h55</td>
+<td>moonrise</td>
+<td>06h46</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>23 Aug, 2025</td>
+<td>sunset</td>
+<td>20h35</td>
+<td>moonset</td>
+<td>20h54</td>
+<td>0.3</td>
+</tr>
+<tr>
+<td>6 Sep, 2025</td>
+<td>sunset</td>
+<td>20h09</td>
+<td>moonrise</td>
+<td>19h42</td>
+<td>98.6</td>
+</tr>
+<tr>
+<td>7 Sep, 2025</td>
+<td>sunset</td>
+<td>20h07</td>
+<td>moonrise</td>
+<td>20h02</td>
+<td>100.0</td>
+</tr>
+<tr>
+<td>8 Sep, 2025</td>
+<td>sunset</td>
+<td>20h05</td>
+<td>moonrise</td>
+<td>20h20</td>
+<td>98.6</td>
+</tr>
+<tr>
+<td>20 Sep, 2025</td>
+<td>sunset</td>
+<td>19h41</td>
+<td>moonset</td>
+<td>19h17</td>
+<td>1.2</td>
+</tr>
+<tr>
+<td>21 Sep, 2025</td>
+<td>sunset</td>
+<td>19h39</td>
+<td>moonset</td>
+<td>19h33</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>22 Sep, 2025</td>
+<td>sunrise</td>
+<td>07h32</td>
+<td>moonrise</td>
+<td>08h00</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>22 Sep, 2025</td>
+<td>sunset</td>
+<td>19h38</td>
+<td>moonset</td>
+<td>19h48</td>
+<td>0.8</td>
+</tr>
+<tr>
+<td>23 Sep, 2025</td>
+<td>sunset</td>
+<td>19h36</td>
+<td>moonset</td>
+<td>20h04</td>
+<td>3.6</td>
+</tr>
+<tr>
+<td>6 Oct, 2025</td>
+<td>sunset</td>
+<td>19h11</td>
+<td>moonrise</td>
+<td>18h42</td>
+<td>99.7</td>
+</tr>
+<tr>
+<td>7 Oct, 2025</td>
+<td>sunrise</td>
+<td>07h51</td>
+<td>moonset</td>
+<td>08h10</td>
+<td>99.9</td>
+</tr>
+<tr>
+<td>7 Oct, 2025</td>
+<td>sunset</td>
+<td>19h09</td>
+<td>moonrise</td>
+<td>19h02</td>
+<td>99.5</td>
+</tr>
+<tr>
+<td>8 Oct, 2025</td>
+<td>sunset</td>
+<td>19h07</td>
+<td>moonrise</td>
+<td>19h27</td>
+<td>96.3</td>
+</tr>
+<tr>
+<td>21 Oct, 2025</td>
+<td>sunrise</td>
+<td>08h09</td>
+<td>moonrise</td>
+<td>08h02</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>21 Oct, 2025</td>
+<td>sunset</td>
+<td>18h44</td>
+<td>moonset</td>
+<td>18h28</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>22 Oct, 2025</td>
+<td>sunset</td>
+<td>18h42</td>
+<td>moonset</td>
+<td>18h49</td>
+<td>1.4</td>
+</tr>
+<tr>
+<td>5 Nov, 2025</td>
+<td>sunrise</td>
+<td>07h30</td>
+<td>moonset</td>
+<td>07h28</td>
+<td>99.8</td>
+</tr>
+<tr>
+<td>5 Nov, 2025</td>
+<td>sunset</td>
+<td>17h21</td>
+<td>moonrise</td>
+<td>16h52</td>
+<td>99.8</td>
+</tr>
+<tr>
+<td>6 Nov, 2025</td>
+<td>sunset</td>
+<td>17h20</td>
+<td>moonrise</td>
+<td>17h28</td>
+<td>97.9</td>
+</tr>
+<tr>
+<td>20 Nov, 2025</td>
+<td>sunrise</td>
+<td>07h51</td>
+<td>moonrise</td>
+<td>08h12</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>20 Nov, 2025</td>
+<td>sunset</td>
+<td>17h04</td>
+<td>moonset</td>
+<td>16h47</td>
+<td>0.3</td>
+</tr>
+<tr>
+<td>21 Nov, 2025</td>
+<td>sunset</td>
+<td>17h03</td>
+<td>moonset</td>
+<td>17h25</td>
+<td>1.9</td>
+</tr>
+<tr>
+<td>4 Dec, 2025</td>
+<td>sunrise</td>
+<td>08h09</td>
+<td>moonset</td>
+<td>07h48</td>
+<td>99.1</td>
+</tr>
+<tr>
+<td>5 Dec, 2025</td>
+<td>sunset</td>
+<td>16h56</td>
+<td>moonrise</td>
+<td>16h57</td>
+<td>99.1</td>
+</tr>
+<tr>
+<td>19 Dec, 2025</td>
+<td>sunrise</td>
+<td>08h21</td>
+<td>moonrise</td>
+<td>08h09</td>
+<td>0.7</td>
+</tr>
+<tr>
+<td>20 Dec, 2025</td>
+<td>sunset</td>
+<td>16h58</td>
+<td>moonset</td>
+<td>17h02</td>
+<td>0.5</td>
+</tr>
+<tr>
+<td>3 Jan, 2026</td>
+<td>sunset</td>
+<td>17h09</td>
+<td>moonrise</td>
+<td>16h57</td>
+<td>99.8</td>
+</tr>
+<tr>
+<td>18 Jan, 2026</td>
+<td>sunrise</td>
+<td>08h19</td>
+<td>moonrise</td>
+<td>08h22</td>
+<td>0.4</td>
+</tr>
+<tr>
+<td>18 Jan, 2026</td>
+<td>sunset</td>
+<td>17h27</td>
+<td>moonset</td>
+<td>17h02</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>1 Feb, 2026</td>
+<td>sunrise</td>
+<td>08h05</td>
+<td>moonset</td>
+<td>08h07</td>
+<td>99.4</td>
+</tr>
+<tr>
+<td>16 Feb, 2026</td>
+<td>sunrise</td>
+<td>07h44</td>
+<td>moonrise</td>
+<td>07h20</td>
+<td>1.7</td>
+</tr>
+<tr>
+<td>17 Feb, 2026</td>
+<td>sunrise</td>
+<td>07h42</td>
+<td>moonrise</td>
+<td>07h43</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>17 Feb, 2026</td>
+<td>sunset</td>
+<td>18h10</td>
+<td>moonset</td>
+<td>18h23</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>18 Feb, 2026</td>
+<td>sunrise</td>
+<td>07h41</td>
+<td>moonrise</td>
+<td>08h02</td>
+<td>0.7</td>
+</tr>
+<tr>
+<td>2 Mar, 2026</td>
+<td>sunrise</td>
+<td>07h20</td>
+<td>moonset</td>
+<td>06h59</td>
+<td>98.2</td>
+</tr>
+<tr>
+<td>3 Mar, 2026</td>
+<td>sunrise</td>
+<td>07h18</td>
+<td>moonset</td>
+<td>07h18</td>
+<td>99.9</td>
+</tr>
+<tr>
+<td>3 Mar, 2026</td>
+<td>sunset</td>
+<td>18h30</td>
+<td>moonrise</td>
+<td>18h42</td>
+<td>99.9</td>
+</tr>
+<tr>
+<td>4 Mar, 2026</td>
+<td>sunrise</td>
+<td>07h16</td>
+<td>moonset</td>
+<td>07h36</td>
+<td>99.3</td>
+</tr>
+<tr>
+<td>18 Mar, 2026</td>
+<td>sunrise</td>
+<td>06h50</td>
+<td>moonrise</td>
+<td>06h24</td>
+<td>0.9</td>
+</tr>
+<tr>
+<td>18 Mar, 2026</td>
+<td>sunset</td>
+<td>18h51</td>
+<td>moonset</td>
+<td>18h31</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>19 Mar, 2026</td>
+<td>sunrise</td>
+<td>06h48</td>
+<td>moonrise</td>
+<td>06h42</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>20 Mar, 2026</td>
+<td>sunrise</td>
+<td>06h46</td>
+<td>moonrise</td>
+<td>07h01</td>
+<td>1.9</td>
+</tr>
+<tr>
+<td>1 Apr, 2026</td>
+<td>sunrise</td>
+<td>07h23</td>
+<td>moonset</td>
+<td>06h58</td>
+<td>99.2</td>
+</tr>
+<tr>
+<td>1 Apr, 2026</td>
+<td>sunset</td>
+<td>20h09</td>
+<td>moonrise</td>
+<td>19h46</td>
+<td>99.8</td>
+</tr>
+<tr>
+<td>2 Apr, 2026</td>
+<td>sunrise</td>
+<td>07h21</td>
+<td>moonset</td>
+<td>07h15</td>
+<td>99.9</td>
+</tr>
+<tr>
+<td>3 Apr, 2026</td>
+<td>sunrise</td>
+<td>07h19</td>
+<td>moonset</td>
+<td>07h33</td>
+<td>98.6</td>
+</tr>
+<tr>
+<td>18 Apr, 2026</td>
+<td>sunrise</td>
+<td>06h52</td>
+<td>moonrise</td>
+<td>06h49</td>
+<td>0.9</td>
+</tr>
+<tr>
+<td>1 May, 2026</td>
+<td>sunset</td>
+<td>20h48</td>
+<td>moonrise</td>
+<td>21h00</td>
+<td>99.8</td>
+</tr>
+<tr>
+<td>2 May, 2026</td>
+<td>sunrise</td>
+<td>06h29</td>
+<td>moonset</td>
+<td>06h22</td>
+<td>99.6</td>
+</tr>
+<tr>
+<td>3 May, 2026</td>
+<td>sunrise</td>
+<td>06h28</td>
+<td>moonset</td>
+<td>06h50</td>
+<td>97.8</td>
+</tr>
+<tr>
+<td>16 May, 2026</td>
+<td>sunset</td>
+<td>21h06</td>
+<td>moonset</td>
+<td>21h25</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>17 May, 2026</td>
+<td>sunrise</td>
+<td>06h10</td>
+<td>moonrise</td>
+<td>05h53</td>
+<td>0.4</td>
+</tr>
+<tr>
+<td>30 May, 2026</td>
+<td>sunset</td>
+<td>21h21</td>
+<td>moonrise</td>
+<td>21h04</td>
+<td>99.5</td>
+</tr>
+<tr>
+<td>1 Jun, 2026</td>
+<td>sunrise</td>
+<td>05h57</td>
+<td>moonset</td>
+<td>06h09</td>
+<td>99.2</td>
+</tr>
+<tr>
+<td>14 Jun, 2026</td>
+<td>sunset</td>
+<td>21h31</td>
+<td>moonset</td>
+<td>21h37</td>
+<td>0.3</td>
+</tr>
+<tr>
+<td>15 Jun, 2026</td>
+<td>sunrise</td>
+<td>05h53</td>
+<td>moonrise</td>
+<td>05h26</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>29 Jun, 2026</td>
+<td>sunset</td>
+<td>21h34</td>
+<td>moonrise</td>
+<td>21h43</td>
+<td>99.8</td>
+</tr>
+<tr>
+<td>30 Jun, 2026</td>
+<td>sunrise</td>
+<td>05h57</td>
+<td>moonset</td>
+<td>05h53</td>
+<td>99.9</td>
+</tr>
+<tr>
+<td>13 Jul, 2026</td>
+<td>sunset</td>
+<td>21h28</td>
+<td>moonset</td>
+<td>21h21</td>
+<td>0.7</td>
+</tr>
+<tr>
+<td>28 Jul, 2026</td>
+<td>sunset</td>
+<td>21h13</td>
+<td>moonrise</td>
+<td>20h55</td>
+<td>99.3</td>
+</tr>
+<tr>
+<td>29 Jul, 2026</td>
+<td>sunrise</td>
+<td>06h23</td>
+<td>moonset</td>
+<td>05h54</td>
+<td>99.8</td>
+</tr>
+<tr>
+<td>29 Jul, 2026</td>
+<td>sunset</td>
+<td>21h12</td>
+<td>moonrise</td>
+<td>21h22</td>
+<td>99.9</td>
+</tr>
+</tbody>
+</table>
+<!-- raw HTML omitted -->
+<h2 id="code">Code</h2>
+
+</content>
+<p>
+  
+  <a href="https://jonathanBieler.github.io/tags/julia/">#Julia</a>
+  
+  <a href="https://jonathanBieler.github.io/tags/astronomy/">#Astronomy</a>
+  
+  <a href="https://jonathanBieler.github.io/tags/photography/">#Photography</a>
+  
+  <a href="https://jonathanBieler.github.io/tags/moon/">#Moon</a>
+  
+</p>
+
+  </main>
+  <footer>Made with <a href="https://github.com/janraasch/hugo-bearblog/">Hugo ʕ•ᴥ•ʔ Bear</a>
+</footer>
+
+    
+</body>
+
+</html>

@@ -4,23 +4,30 @@
     <title>Blogs on jonathanBieler.github.io</title>
     <link>https://jonathanBieler.github.io/blog/</link>
     <description>Recent content in Blogs on jonathanBieler.github.io</description>
-    <generator>Hugo</generator>
+    <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 01 Nov 2024 15:14:00 +0200</lastBuildDate>
+    <lastBuildDate>Wed, 13 Aug 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://jonathanBieler.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Catching the moon at the right time with Julia</title>
+      <link>https://jonathanBieler.github.io/blog/moon_and_sun/</link>
+      <pubDate>Wed, 13 Aug 2025 00:00:00 +0000</pubDate>
+      <guid>https://jonathanBieler.github.io/blog/moon_and_sun/</guid>
+      <description>The moon on a night sky is surprisingly bright, especially for a camera with limited dynamic range. And there&amp;rsquo;s only so many compositions one can do of the moon on a naked sky. For those reasons taking moon pictures at sunrise or sunset, when the moon is close to the horizon and its relative brightness is comparable to ambient light often brings more interesting (or at least varied) results.</description>
+    </item>
     <item>
       <title>Exploring Depth-Based Raw Photo Processing in Julia</title>
       <link>https://jonathanBieler.github.io/blog/focal.jl/</link>
       <pubDate>Fri, 01 Nov 2024 15:14:00 +0200</pubDate>
       <guid>https://jonathanBieler.github.io/blog/focal.jl/</guid>
-      <description>&lt;p&gt;Models for estimating depth from a single image&#xA;(e.g, &lt;a href=&#34;https://github.com/DepthAnything/Depth-Anything-V2&#34;&gt;Depth-Anything-V2&lt;/a&gt;,&#xA;&lt;a href=&#34;https://github.com/isl-org/MiDaS&#34;&gt;MiDaS&lt;/a&gt;) are pretty good nowadays, to the point&#xA;where they can be used for photo editing (even &lt;a href=&#34;https://youtu.be/ljf8IhxqS20?t=69&#34;&gt;Photoshop&lt;/a&gt; use them).&lt;/p&gt;&#xA;&lt;p&gt;In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in &lt;a href=&#34;https://julialang.org/downloads/&#34;&gt;Julia&lt;/a&gt;. The most obvious use case is to simulate bokeh (especially for smartphone that often can&amp;rsquo;t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette. These can help to add depth to an image and emphasize its subject.&lt;/p&gt;</description>
+      <description>Models for estimating depth from a single image (e.g, Depth-Anything-V2, MiDaS) are pretty good nowadays, to the point where they can be used for photo editing (even Photoshop use them).&#xA;In this article, I explore some applications of a depth mask for phography using Depth-Anything-V2 in Julia. The most obvious use case is to simulate bokeh (especially for smartphone that often can&amp;rsquo;t produce shallow depth of field optically), but a depth mask can also be used to add or remove haze from an image, simulate lighting with a flash or provide a natural vignette .</description>
     </item>
     <item>
       <title>From FASTQ to CNV calls in Julia</title>
       <link>https://jonathanBieler.github.io/blog/fastq2cnv/</link>
       <pubDate>Mon, 08 Apr 2024 15:14:00 +0200</pubDate>
       <guid>https://jonathanBieler.github.io/blog/fastq2cnv/</guid>
-      <description>&lt;p&gt;I&amp;rsquo;ve recently worked on &lt;a href=&#34;https://github.com/jonathanBieler/BurrowsWheelerAligner.jl&#34;&gt;Julia bindings&lt;/a&gt; for BWA, allowing to align&#xA;sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates&#xA;to &lt;a href=&#34;https://github.com/BioJulia/XAM.jl.git&#34;&gt;XAM.jl&lt;/a&gt; and &lt;a href=&#34;https://github.com/jonathanBieler/BioRecordsProcessing.jl&#34;&gt;BioRecordsProcessing.jl&lt;/a&gt;&#xA;will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.&lt;/p&gt;&#xA;&lt;p&gt;To illustrate this I will showcase online whole-genome sequencing (WGS) copy number variation (CNV) calling on a mouse kidney tumor sample.&lt;/p&gt;&#xA;&lt;p&gt;Briefly, we need to do the following :&lt;/p&gt;</description>
+      <description>I&amp;rsquo;ve recently worked on Julia bindings for BWA, allowing to align sequencing reads (FASTA or FASTQ) to a reference genome directly from Julia. On top of this, updates to XAM.jl and BioRecordsProcessing.jl will make it possible to build end-to-end workflows in Julia, from raw reads to analysis results.&#xA;To illustrate this I will showcase online whole-genome sequencing (WGS) copy number variation (CNV) calling on a mouse kidney tumor sample.&#xA;Briefly, we need to do the following :</description>
     </item>
   </channel>
 </rss>
