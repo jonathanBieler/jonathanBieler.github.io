@@ -8,7 +8,7 @@
 }
 
 body {
-  background-color: rgb(247, 245, 241);
+    background-color: rgb(247, 245, 241);
 }
 
 /* Regular headers */
@@ -52,3 +52,42 @@ h3, h4 {
     font-size: 0.9em;
 }
 
+
+@media (prefers-color-scheme: dark) {
+
+    body, p {
+    color: #E0E0E0;      /* readable dark gray */
+    line-height: 1.6;
+    }
+
+
+    body {
+    background-color: #1f1e1e;
+    color: #E0E0E0;
+    }
+
+    .title {
+    color: #A8B8C8;
+    }
+
+    h1, h2 {
+    color: #E5E5E5;
+    }
+
+    h3, h4 {
+    color: #BBBBBB;
+    }
+
+    a {
+    color: #7DB7E0;
+    }
+
+    a:hover,
+    ul.blog-posts li a:visited {
+    color: #5A95B8;
+    }
+
+    .meta, .post-meta {
+    color: #AAAAAA;
+  }
+}

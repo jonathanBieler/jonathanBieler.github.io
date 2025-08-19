@@ -282,7 +282,7 @@ The main functionalities, namely the moon and sun position at a given date, are 
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>start_date <span style="color:#f92672">=</span> Date(<span style="color:#ae81ff">2025</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">4</span>)
 </span></span></code></pre></div><p>We also need our timezone to convert between universal time and our local observations.</p>
-<p>AstroLib routines take time in <a href="https://en.wikipedia.org/wiki/Julian_day">Julian days</a>, which surprinzingly aren&rsquo;t Julia specific units,
+<p>AstroLib routines take time in <a href="https://en.wikipedia.org/wiki/Julian_day">Julian days</a>, which surprisingly aren&rsquo;t Julia specific units,
 but units used by astronomers. We can convert from a Julia date
 to Julian days with <code>jdcnv</code> :</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span>date_to_jd(date) <span style="color:#f92672">=</span> jdcnv(DateTime(date))
@@ -296,7 +296,7 @@ When altitude crosses zero, we have a rise or set event.</p>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
 </span></span></code></pre></div><p>The <code>sunpos</code> function returns the right ascension and declination of the Sun at a given date, right ascension and declination being angles defining a direction
 on the <a href="https://en.wikipedia.org/wiki/Equatorial_coordinate_system#Spherical_coordinates">celestial sphere</a>.</p>
-<p>The <code>eq2hor</code> function converts these two angles into an alitude (angle to the horizon) for our local position.</p>
+<p>The <code>eq2hor</code> function converts these two angles into an altitude (angle to the horizon) for our local position.</p>
 <p>We can make a plot of the altitude for a day. As cou can see on that day the mon rises as the sun is setting, that&rsquo;s the type of events we are loooking for!</p>
 <p><img src="/sun_and_moon/altitudes.png" alt="targets"></p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-julia" data-lang="julia"><span style="display:flex;"><span>start_date <span style="color:#f92672">=</span> Date(<span style="color:#ae81ff">2025</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">8</span>)
